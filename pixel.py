@@ -23,7 +23,7 @@ def pde_test(pde, t_test, x_test, u_test, lambda_1, net_u_2d, problem, it, loss_
         num_test = 250
         Helmholtz_2d_test(pde, t_test, x_test, u_test, lambda_1, net_u_2d, problem, it, loss_list, output_path, tag, num_test)
     elif pde == 'customized':
-        num_test = 250
+        num_test = int(np.sqrt(t_test.shape[0]))
         Customized_2d_test(pde, t_test, x_test, u_test, lambda_1, net_u_2d, problem, it, loss_list, output_path, tag, num_test)
 
 
