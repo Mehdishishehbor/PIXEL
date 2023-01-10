@@ -218,3 +218,8 @@ def generate_Navier_Stokes_inverse_data(num_train):
     y_train_f = txy_f[:, 2:3]
 
     return t_train_f, x_train_f, y_train_f, t_train, x_train, y_train, txt_u, txt_v
+
+
+def customized_2d_exact_u(x, y, omega):
+    # data
+    return torch.sin(omega * x * y) + x**2 + 2 * x * y

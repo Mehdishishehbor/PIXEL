@@ -5,9 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "args":["--network", "base","--pde", "convection_1d","--ic-func", "sin_x", "--beta", "30", "--in-dim", "2", "--out-dim","1", "--use-cell",
+            "args":["--network", "base","--pde", "customized_2d","--omega", "1.0", "--in-dim", "2", "--out-dim","1", "--use-cell",
                  "--n-cells", "16", "--cell-dim", "4", "--cell-size", "16", "--interp", "cosine", "--num-train", "100000", "--num-init", "100000",
-                 "--random-f", "--f-scale", "0.005", "--hidden-dim", "16", "--num-layers", "2", "--max-iter", "18001", "--seed", "500", "--tag", "sample_tag"],
+                 "--num-test","250", "--random-f", "--f-scale", "0.00001", "--hidden-dim", "16", "--num-layers", "2", "--max-iter", "1001", "--seed",
+                "100", "--tag", "custom_1e4_adam", "--optim","adam"],
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",

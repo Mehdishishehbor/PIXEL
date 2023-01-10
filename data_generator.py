@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from ground_truth import reaction, diffusion, helmholtz_2d_exact_u, helmholtz_2d_source_term, helmholtz_3d_exact_u, helmholtz_3d_source_term
+from ground_truth import reaction, diffusion, helmholtz_2d_exact_u, helmholtz_2d_source_term, helmholtz_3d_exact_u, helmholtz_3d_source_term, customized_2d_exact_u
 
 ''' Contents : 1. Generate Train data
                2. Generate Test data    '''
@@ -284,3 +284,41 @@ def generate_Helmholtz_3d_test_data(num_test, a1, a2, a3):
     u_test = helmholtz_3d_exact_u(x_test, y_test, z_test, a1, a2, a3)
 
     return x_test, y_test, z_test, u_test
+
+
+
+def generate_Customized_2d_train_data(num_train, num_bc, omega):
+    # colocation points
+    yc = torch.empty((num_train, 1), dtype=torch.float32).uniform_(0.0, 1.)
+    xc = torch.empty((num_train, 1), dtype=torch.float32).uniform_(0.0, 1.)
+  
+    # requires grad
+    yc.requires_grad = True
+    xc.requires_grad = True
+    uc = torch.zeros_like(xc)
+    # boundary points
+    north = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
+    west = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
+    south = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
+    east = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
+    yb = torch.cat([
+        torch.ones((num_bc, 1)), west,
+        torch.ones((num_bc, 1)) * 0.0, east
+        ])
+    xb = torch.cat([
+        north, torch.ones((num_bc, 1)) * 0.0,
+        south, torch.ones((num_bc, 1))
+        ])
+    ub = customized_2d_exact_u(yb, xb, omega)
+    return yc, xc, uc, yb, xb, ub
+
+
+def generate_Customized_2d_test_data(num_test, omega):
+    # test points
+    y = torch.linspace(0, 1, num_test)
+    x = torch.linspace(0, 1, num_test)
+    y, x = torch.meshgrid([y, x], indexing='ij')
+    y_test = y.reshape(-1, 1)
+    x_test = x.reshape(-1, 1)
+    u_test = customized_2d_exact_u(y_test, x_test, omega)
+    return y_test, x_test, u_test

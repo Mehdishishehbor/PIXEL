@@ -22,6 +22,10 @@ def pde_test(pde, t_test, x_test, u_test, lambda_1, net_u_2d, problem, it, loss_
     elif pde == '2d_helmholtz':
         num_test = 250
         Helmholtz_2d_test(pde, t_test, x_test, u_test, lambda_1, net_u_2d, problem, it, loss_list, output_path, tag, num_test)
+    elif pde == 'customized':
+        num_test = 250
+        Customized_2d_test(pde, t_test, x_test, u_test, lambda_1, net_u_2d, problem, it, loss_list, output_path, tag, num_test)
+
 
 class PIXEL():
     def __init__(self, network, args, PDE):
@@ -187,6 +191,21 @@ class PIXEL():
         elif self.pde == '3d_navier_stokes':
             self.t_train_f, self.x_train_f, self.y_train_f, self.t_train, self.x_train, self.y_train, self.txt_u, self.txt_v = generate_Navier_Stokes_inverse_data(self.num_train)
         
+        
+        elif self.pde == 'customized':
+            ''' PDE attribution '''
+            self.exist_pde_source_term = False
+            self.boundary_condition = True
+            self.number_of_boundary = 1
+            self.boundary_gradient_condition = False
+            self.mixed_boundary_condition = False
+            ''' PDE parameter '''
+            self.omega = args.omega
+            ''' load data '''
+            self.t_test, self.x_test, self.u_test = generate_Customized_2d_test_data(self.num_test, self.omega)
+            self.t_train_f, self.x_train_f, self.u_train_f, self.t_train, self.x_train, self.u_train = generate_Customized_2d_train_data(self.num_train, self.num_bc, self.omega)
+
+
 
     def set_optimizer(self):
         if self.optim == 'lbfgs':
@@ -213,6 +232,9 @@ class PIXEL():
             elif pde == 'convection' or pde == 'reaction-diffusion':
                 t = t*2-1
                 x = (x-np.pi)/np.pi
+            elif pde == 'customized':
+                t = t*2-1
+                x = x*2-1
             x = torch.cat([t, x], dim=-1).unsqueeze(0).unsqueeze(0)
         else:
             x = torch.cat([t, x], dim=1)
@@ -265,6 +287,8 @@ class PIXEL():
             f = AllenCahn(u, t, x, self.nu, lambda_1, self.args.problem)
         elif pde == '2d_helmholtz':
             f = Helmholtz_2d(u, t, x, self.coefficient, lambda_1, self.args.problem)
+        elif pde == 'customized':
+            f = Customized_2d(u, t, x, self.omega)
 
         return f
     
@@ -329,7 +353,7 @@ class PIXEL():
                             loss_b = torch.zeros(1)
 
             
-            if self.pde == 'burgers' or self.pde == '2d_helmholtz':
+            if self.pde == 'burgers' or self.pde == '2d_helmholtz' or self.pde == 'customized':
                 scaled_loss = loss_u + self.f_scale*loss_f + self.lamb*self.loss_tv
             elif self.pde == 'convection':
                 scaled_loss = loss_u + loss_b + self.f_scale*loss_f + self.lamb*self.loss_tv
@@ -434,6 +458,8 @@ class PIXEL():
                 loss_u = torch.mean((self.u_train - u_pred) ** 2)
                 loss_f = torch.mean(f_pred ** 2)
                 loss = loss_u + loss_f
+                if self.pde == 'customized':
+                    self.boundary_condition = False
                 if self.boundary_condition:
                     ''' boundary condition '''
                     u_bc1_pred = self.net_u_2d(self.t_bc1_train, self.x_bc1_train, self.pde)

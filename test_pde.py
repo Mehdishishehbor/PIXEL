@@ -208,3 +208,27 @@ def Navier_Stokes_3d_test(lambda_1, lambda_2, net_f_3d, net_u_3d, t_train_f, x_t
 
     if it % 15 == 0 :
         NavierStokes_plot(it, num_test, net_u_3d, output_path, tag)
+
+
+def Customized_2d_test(pde, y_test, x_test, u_test, inverse_lambda, net_u, problem, it, loss_list, output_path, tag, num_test):
+    u_pred = net_u(y_test, x_test, pde)
+    u_pred_arr = u_pred.detach().cpu().numpy()
+    u_test_arr = u_test.detach().cpu().numpy()
+    
+    l2_loss = np.linalg.norm(u_pred_arr - u_test_arr) / np.linalg.norm(u_test_arr)
+    if problem == 'forward':
+        loss_list.append(l2_loss)
+        if it % 15 ==0 :
+            print('[Test Iter:%d, Loss: %.5e]'%(it, l2_loss))
+            # logger.error('Iter %d, l2_Loss: %.5e', it+1, l2_loss)
+            
+    elif problem == 'inverse':
+        print('[Test Iter:%d, lambda: %.5e, Loss: %.5e]'%(it, inverse_lambda, l2_loss))
+        # logger.error('Iter %d, lambda: %.5e, l2_Loss: %.5e', it+1, lambda_1, l2_loss)   
+        loss_list.append(inverse_lambda.item())
+    
+    sys.stdout.flush()
+    save_loss_list(problem, loss_list, it, output_path)
+
+    if it % 15 == 0 :
+        Customized_2d_plot(it, y_test, x_test, u_pred.detach(), u_test, num_test, output_path, tag)

@@ -103,3 +103,16 @@ def Navier_Stokes_3d(uvp, t, x, y, inverse_lambda_1, inverse_lambda_2):
     f_v = v_t + inverse_lambda_1*(u*v_x + v*v_y) + p_y - inverse_lambda_2*(v_xx + v_yy)
    
     return f_u, f_v
+
+
+def Customized_2d(u, y, x, omega):
+    """ The pytorch autograd version of calculating residual """
+    u_y = torch.autograd.grad(u, y, torch.ones_like(u), True, True)[0]
+    u_yy = torch.autograd.grad(u_y, y, torch.ones_like(u_y), True, True)[0]
+    u_x = torch.autograd.grad(u, x, torch.ones_like(u), True, True)[0]
+    u_xx = torch.autograd.grad(u_x, x, torch.ones_like(u_x), True, True)[0]
+    
+
+    f =  u_yy + 2.0 * u_xx -4.0 + omega**2.0 * (x**2 + 2 * y**2) * torch.sin(omega * x * y)
+
+    return f

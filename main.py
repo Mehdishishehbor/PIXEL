@@ -151,6 +151,8 @@ if __name__=='__main__':
         model = PIXEL(network, args, '3d_navier_stokes')
     elif args.pde == 'ac_1d':
         model = PIXEL(network, args, 'allen-cahn')
+    elif args.pde == 'customized_2d':
+        model = PIXEL(network, args, args.pde[:-3])
     else:
         raise NotImplementedError()
 
