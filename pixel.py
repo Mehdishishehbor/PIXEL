@@ -202,8 +202,8 @@ class PIXEL():
             ''' PDE parameter '''
             self.omega = args.omega
             ''' load data '''
-            self.t_test, self.x_test, self.u_test = generate_Customized_2d_test_data(self.num_test, self.omega)
-            self.t_train_f, self.x_train_f, self.u_train_f, self.t_train, self.x_train, self.u_train = generate_Customized_2d_train_data(self.num_train, self.num_bc, self.omega)
+            self.t_test, self.x_test, self.u_test = generate_Customized_2d_test_data(self.num_test, self.omega, self.args.domain_size)
+            self.t_train_f, self.x_train_f, self.u_train_f, self.t_train, self.x_train, self.u_train = generate_Customized_2d_train_data(self.num_train, self.num_bc, self.omega, self.args.domain_size)
 
 
 
@@ -233,6 +233,9 @@ class PIXEL():
                 t = t*2-1
                 x = (x-np.pi)/np.pi
             elif pde == 'customized':
+                xmin, xmax, ymin, ymax = self.args.domain_size
+                t = (t - xmin)/(xmax - xmin)
+                x = (x - ymin)/(ymax - ymin)
                 t = t*2-1
                 x = x*2-1
             x = torch.cat([t, x], dim=-1).unsqueeze(0).unsqueeze(0)
@@ -508,6 +511,8 @@ class PIXEL():
                     self.x_train_f, self.y_train_f, self.z_train_f, self.u_train_f, self.x_train, self.y_train, self.z_train, self.u_train = generate_Helmholtz_3d_train_data(self.num_train, self.num_bc, self.a1, self.a2, self.a3, self.coefficient)
                 elif self.pde == '3d_naver_stokes':
                      self.t_train_f, self.x_train_f, self.y_train_f, self.t_train, self.x_train, self.y_train, self.txt_u, self.txt_v = generate_Navier_Stokes_inverse_data() 
+                elif self.pde == 'customized':
+                    self.t_train_f, self.x_train_f, self.u_train_f, self.t_train, self.x_train, self.u_train = generate_Customized_2d_train_data(self.num_train, self.num_bc, self.omega, self.args.domain_size)
 
 
 

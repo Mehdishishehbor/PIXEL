@@ -287,36 +287,42 @@ def generate_Helmholtz_3d_test_data(num_test, a1, a2, a3):
 
 
 
-def generate_Customized_2d_train_data(num_train, num_bc, omega):
+def generate_Customized_2d_train_data(num_train, num_bc, omega, domain_size):
+    # size of the domain
+    xmin, xmax, ymin, ymax = domain_size
+
     # colocation points
-    yc = torch.empty((num_train, 1), dtype=torch.float32).uniform_(0.0, 1.)
-    xc = torch.empty((num_train, 1), dtype=torch.float32).uniform_(0.0, 1.)
+    yc = torch.empty((num_train, 1), dtype=torch.float32).uniform_(xmin, xmax)
+    xc = torch.empty((num_train, 1), dtype=torch.float32).uniform_(ymin, ymax)
   
     # requires grad
     yc.requires_grad = True
     xc.requires_grad = True
     uc = torch.zeros_like(xc)
     # boundary points
-    north = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
-    west = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
-    south = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
-    east = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(0., 1.)
+    north = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(xmin, xmax)
+    west = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(ymin, ymax)
+    south = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(xmin, xmax)
+    east = torch.empty((num_bc, 1), dtype=torch.float32).uniform_(ymin, ymax)
     yb = torch.cat([
-        torch.ones((num_bc, 1)), west,
-        torch.ones((num_bc, 1)) * 0.0, east
+        torch.ones((num_bc, 1)) * ymax, west,
+        torch.ones((num_bc, 1)) * ymin, east
         ])
     xb = torch.cat([
-        north, torch.ones((num_bc, 1)) * 0.0,
-        south, torch.ones((num_bc, 1))
+        north, torch.ones((num_bc, 1)) * xmin,
+        south, torch.ones((num_bc, 1)) * xmax
         ])
     ub = customized_2d_exact_u(yb, xb, omega)
     return yc, xc, uc, yb, xb, ub
 
 
-def generate_Customized_2d_test_data(num_test, omega):
+def generate_Customized_2d_test_data(num_test, omega, domain_size):
+
+    # size of the domain
+    xmin, xmax, ymin, ymax = domain_size
     # test points
-    y = torch.linspace(0, 1, num_test)
-    x = torch.linspace(0, 1, num_test)
+    y = torch.linspace(ymin, ymax, num_test)
+    x = torch.linspace(xmin, xmax, num_test)
     y, x = torch.meshgrid([y, x], indexing='ij')
     y_test = y.reshape(-1, 1)
     x_test = x.reshape(-1, 1)

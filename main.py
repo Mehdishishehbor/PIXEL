@@ -103,6 +103,7 @@ parser.add_argument('--lambda-1', type=float, default=1.0, metavar='N', help='A 
 parser.add_argument('--lambda-2', type=float, default=1.0, metavar='N', help='A PDE parameter (default: 1.0)')
 parser.add_argument('--streaks', action='store_true', default=False)
 parser.add_argument('--cuda-off', action='store_true', default=False, help='if you use --cuda-off, cuda will be off')
+parser.add_argument('--domain-size', type=float, nargs='+', default=[0.0,1.0,0.0,1.0], help='[xmin, xmax, ymin, ymax]')
 
 if __name__=='__main__':
 
